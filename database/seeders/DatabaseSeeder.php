@@ -21,7 +21,9 @@ use Closure;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Helper\ProgressBar;
 
@@ -31,6 +33,8 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        DB::raw('SET time_zone=\'+00:00\'');
+
         // Clear images
         Storage::deleteDirectory('public');
 
@@ -47,6 +51,7 @@ class DatabaseSeeder extends Seeder
         $brands = $this->withProgressBar(20, fn () => Brand::factory()->count(20)
             ->has(Address::factory()->count(rand(1, 3)))
             ->create());
+        Brand::query()->update(['sort' => new Expression('id')]);
         $this->command->info('Shop brands created.');
 
         $this->command->warn(PHP_EOL . 'Creating shop categories...');
